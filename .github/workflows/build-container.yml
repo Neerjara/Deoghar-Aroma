@@ -1,3 +1,4 @@
+#CI Pipeline
 name: Build and push storefront image
 
 on:
