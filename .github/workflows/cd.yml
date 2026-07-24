@@ -1,0 +1,74 @@
+name: Deploy to AKS using Helm
+
+on:
+  workflow_dispatch:
+    inputs:
+      imageTag:
+        description: "Docker image tag to deploy"
+        required: true
+        default: "latest"
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  RESOURCE_GROUP: savings-rg
+  AKS_CLUSTER: savings-aks
+  ACR_NAME: savingswsaacr
+  IMAGE_NAME: aroma-deoghar
+  NAMESPACE: default
+  RELEASE_NAME: aroma-deoghar
+  HELM_CHART_PATH: ./helm/aroma-deoghar
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Login to Azure using OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      - name: Get AKS Credentials
+        run: |
+          az aks get-credentials \
+            --resource-group $RESOURCE_GROUP \
+            --name $AKS_CLUSTER \
+            --overwrite-existing
+
+      - name: Verify Cluster Connection
+        run: |
+          kubectl cluster-info
+          kubectl get nodes
+
+      - name: Deploy using Helm
+        run: |
+          helm upgrade --install $RELEASE_NAME $HELM_CHART_PATH \
+            --namespace $NAMESPACE \
+            --create-namespace \
+            --set image.repository=$ACR_NAME.azurecr.io/$IMAGE_NAME \
+            --set image.tag=${{ github.event.inputs.imageTag }}
+
+      - name: Verify Deployment
+        run: |
+          kubectl rollout status deployment/$RELEASE_NAME -n $NAMESPACE
+          kubectl get pods -n $NAMESPACE
+          kubectl get svc -n $NAMESPACE
+
+      - name: Show Helm Releases
+        run: |
+          helm list -n $NAMESPACE
