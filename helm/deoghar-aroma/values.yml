@@ -1,0 +1,20 @@
+replicaCount: 2
+
+namespace: storefront
+
+image:
+  repository: savingswsaacr.azurecr.io/aroma-deoghar
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+  port: 80
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 250m
+    memory: 128Mi
