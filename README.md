@@ -1,4 +1,4 @@
-# Aroma Deoghar storefront
+# Aroma Deoghar indiefumes
 
 A static perfume storefront for a Deoghar boutique. Replace the placeholder WhatsApp number `919999999999` in `index.html` and `app.js` before public launch.
 
