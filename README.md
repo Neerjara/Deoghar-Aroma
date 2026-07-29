@@ -2,7 +2,7 @@
 
 A static perfume storefront for a Deoghar boutique. Replace the placeholder WhatsApp number `919999999999` in `index.html` and `app.js` before public launch.
 
-## Deploy to the AKS environment
+## Deploy to AKS environment
 
 ```powershell
 az aks get-credentials --resource-group savings-rg --name savings-aks --overwrite-existing
